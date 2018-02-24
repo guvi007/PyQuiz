@@ -24,6 +24,8 @@ class Application(tk.Frame):
         tkMessageBox.showinfo('Welcome!','Welcome to PyQuiz!\nA quiz built in Python to test your general knowledge.')
         tk.Frame.__init__(self, master)
         self.grid()
+	self.start = 1	# handle for 1st question
+	self.flag = 0	# checks whether each question is marked or not
         # declaring variables to store question and answer
         self.optionA = tk.StringVar() # control variable for option A
         self.optionB = tk.StringVar() # control variable for option B
@@ -69,6 +71,7 @@ class Application(tk.Frame):
 	Function to set the 'selected_answer' variable to the selected option label to compare with correct answer later.
 	Args: answer - gets the option number which calls this function.
 	'''
+	self.flag = 1	# answer to the current question is selected
         if answer==1:
             self.selected_answer = self.optionA.get()
         elif answer==2:
@@ -103,32 +106,38 @@ class Application(tk.Frame):
 	Function to load a new question set with options. The question is randomly picked from the JSON file for questions.
 	The options to that questions are also randomized and loaded.
 	'''
-        self.validate_ans() # call to check the answer before loading the next question
-        randomindex = random.randint(0,len(self.questions["results"])-1) # generate random index to be picked from list
-        if randomindex not in self.question_index: # only proceed if the question has not already been picked up.
-            self.question_index.append(randomindex) # keep a track of the question indices.
-            pass
-        else:
-            randomindex = random.randint(0,len(self.questions["results"])-1)
-            self.question_index.append(randomindex)
-            print "Debug:"
-            print self.questions["results"][randomindex]["question"] 
-        self.correct_answer = self.questions["results"][randomindex]["correct_answer"] # parse the correct answer from JSON file and store it.
-        #print self.correct_answer
-        self.answers = self.questions["results"][randomindex]["incorrect_answers"] # parse the other incorrect answers
-        self.answers.append(self.correct_answer) # add all the answers to the list. 
-        self.question.set(self.questions["results"][randomindex]["question"]) # set the question label
-        length=len(self.question.get())  # get the length of the question
-        width=str(100+10*length)	
-        top.geometry(width+"x180")	# change the width of the window according to the length of the question
-        self.optionA.set(self.answers.pop(random.randrange(len(self.answers)))) # randomly set the option label from the answers list and then remove from that list to avoid repetition
-        self.optionB.set(self.answers.pop(random.randrange(len(self.answers))))
-        self.optionC.set(self.answers.pop(random.randrange(len(self.answers))))
-        self.optionD.set(self.answers.pop(random.randrange(len(self.answers))))
-        self.radioButtonA.deselect()
-        self.radioButtonB.deselect()
-        self.radioButtonC.deselect()
-        self.radioButtonD.deselect()
+	
+	if self.flag == 1 or self.start == 1:	#if answer is selected
+		self.start = 0
+		self.flag = 0
+		self.validate_ans() # call to check the answer before loading the next question
+		randomindex = random.randint(0,len(self.questions["results"])-1) # generate random index to be picked from list
+		if randomindex not in self.question_index: # only proceed if the question has not already been picked up.
+		    self.question_index.append(randomindex) # keep a track of the question indices.
+		    pass
+		else:
+		    randomindex = random.randint(0,len(self.questions["results"])-1)
+		    self.question_index.append(randomindex)
+		    print "Debug:"
+		    print self.questions["results"][randomindex]["question"] 
+		self.correct_answer = self.questions["results"][randomindex]["correct_answer"] # parse the correct answer from JSON file and store it.
+		#print self.correct_answer
+		self.answers = self.questions["results"][randomindex]["incorrect_answers"] # parse the other incorrect answers
+		self.answers.append(self.correct_answer) # add all the answers to the list. 
+		self.question.set(self.questions["results"][randomindex]["question"]) # set the question label
+		length=len(self.question.get())  # get the length of the question
+		width=str(100+10*length)	
+		top.geometry(width+"x180")	# change the width of the window according to the length of the question
+		self.optionA.set(self.answers.pop(random.randrange(len(self.answers)))) # randomly set the option label from the answers list and then remove from that list to avoid repetition
+		self.optionB.set(self.answers.pop(random.randrange(len(self.answers))))
+		self.optionC.set(self.answers.pop(random.randrange(len(self.answers))))
+		self.optionD.set(self.answers.pop(random.randrange(len(self.answers))))
+		self.radioButtonA.deselect()
+		self.radioButtonB.deselect()
+		self.radioButtonC.deselect()
+		self.radioButtonD.deselect()
+	else:
+		tkMessageBox.showinfo("error","Please select an answer first.")
 	
         
     def createWidgets(self,top):
